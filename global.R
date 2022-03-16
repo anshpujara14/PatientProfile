@@ -1,13 +1,13 @@
 
-source('radar/dependencies.R')
+source('dependencies.R')
 
 lapply(required_packages, require, character.only = TRUE)
 
 # DATA TRANSFORMATION AND NEW VARIABLES -----------------------------------
 
-admission <- read_csv("radar/data/admissions.csv")
-antimicrobial <- read_csv("radar/data/antimicrobials.csv")
-microbiology <- read_csv("radar/data/microbiology.csv")
+admission <- read_csv("data/admissions.csv")
+antimicrobial <- read_csv("data/antimicrobials.csv")
+microbiology <- read_csv("data/microbiology.csv")
 
 admission <- admission %>%
   mutate(year = year(adm_start_date),
@@ -41,14 +41,19 @@ pat <- admission %>% as.data.table()
 anti <- antimicrobial %>% as.data.table()
 micro <- microbiology %>% as.data.table()
 
-anti <- anti[pat, on = .(id, as.Date(ab_start_date) >= as.Date(adm_start_date), as.Date(ab_stop_date) <= as.Date(adm_end_date)), .(id, adm_id, as.Date(ab_start_date) = as.Date(x.ab_start_date), ab_stop_date = x.ab_stop_date, adm_start_date, adm_end_date, atc_code, ddd_per_day, ab_route), nomatch = 0L]
+anti <- anti[
+  pat,
+  on = .(id, ab_start_date >= adm_start_date, ab_stop_date <= adm_end_date),
+  .(id, adm_id, ab_start_date = x.ab_start_date, ab_stop_date = x.ab_stop_date, adm_start_date, adm_end_date, atc_code, ddd_per_day, ab_route),
+  nomatch = 0L
+]
 
 micro <- micro[
   pat,
   on = .(id, test_date >= adm_start_date, test_date <= adm_end_date),
   .(id, adm_id, test_date = x.test_date, test_number, adm_start_date, adm_end_date, material),
   nomatch = 0L
-  ]
+]
 
 anti_first <- anti %>%
   group_by(id, adm_id) %>%
@@ -74,7 +79,7 @@ uc_timing <- micro %>%
   select(id, adm_id, uc_timing) %>%
   distinct()
 
-admissions <- admissions %>%
+admission <- admission %>%
   left_join(bc_timing) %>% 
   left_join(uc_timing)
 
@@ -90,16 +95,20 @@ antimicrobial <- antimicrobial %>%
   semi_join(anti) %>%
   left_join(admissions)
 
+
+amr_antibiotics <- AMR::antibiotics
+amr_antibiotics$atc <- as.character(amr_antibiotics$atc)
+
 antimicrobial <- antimicrobial %>%
   mutate(ab_days = as.integer(ab_stop_date - ab_start_date),
-         ab_timing = as.integer(ab_start_date - adm_start_date),
+         ab_timing = as.integer(ab_start_date - ab_start_date),
          ddd_per_prescription = ddd_per_day*ab_days) %>%
   left_join(
-    AMR::antibiotics %>%
+    amr_antibiotics %>%
       select(
         atc_code = atc, ab_type = name, ab_group = atc_group2
       ), by = "atc_code") %>%
-  group_by(id, adm_id) %>%
+  group_by(id) %>%
   mutate(ddd_total = sum(ddd_per_prescription, na.rm = TRUE),
          ab_first = if_else(ab_start_date == min(ab_start_date, na.rm = TRUE), TRUE, FALSE)) %>%
   ungroup()
@@ -111,7 +120,7 @@ continuous_treatment_duration <-
     ind <- rleid((ab_start_date - shift(ab_stop_date, fill = Inf)) > 0) == 1
     .(ab_start_cont = min(ab_start_date[ind]),
       ab_stop_cont  = max(ab_stop_date[ind]))}
-    , by = c("id", "adm_id")] %>%
+    , by = c("id")] %>%
   .[, ab_days_all := as.integer(ab_stop_cont - ab_start_cont + 1)]
 
 antimicrobial <- antimicrobial %>%
@@ -143,8 +152,8 @@ update_ab <- antimicrobial %>%
 
 # HELP & INTRO DATA ---------------------------------------------------------------
 
-steps <- read.csv("radar/help.csv")
-intro <- read.csv("radar/intro.csv")
+steps <- read.csv("help.csv")
+intro <- read.csv("intro.csv")
 
 
 # FLUID DESIGN FUNCTION ---------------------------------------------------

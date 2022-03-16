@@ -1,18 +1,18 @@
 # LIST OF REQUIRED PACKAGES -----------------------------------------------
 
-required_packages <- c(
-  "checkpoint", "AMR", "rintrojs", "survminer", "data.table", "ggridges", "qicharts2", "shinyBS", "shinycssloaders", "shinyWidgets", "survival"
-)
-
-# install missing packages
-
-new.packages <- required_packages[!(required_packages %in% installed.packages()[,"Package"])]
-
-if (length(new.packages)) {
-  install.packages(new.packages)
-}
-
-rm(new.packages)
+# required_packages <- c(
+#   "checkpoint", "AMR", "rintrojs", "survminer", "data.table", "ggridges", "qicharts2", "shinyBS", "shinycssloaders", "shinyWidgets", "survival"
+# )
+# 
+# # install missing packages
+# 
+# new.packages <- required_packages[!(required_packages %in% installed.packages()[,"Package"])]
+# 
+# if (length(new.packages)) {
+#   install.packages(new.packages)
+# }
+# 
+# rm(new.packages)
 
 library(checkpoint)
 # checkpoint(snapshot_date ='2019-12-17')
@@ -36,3 +36,4 @@ library(survminer)
 library(tidyverse)
 library(viridis)
 library(zoo)
+

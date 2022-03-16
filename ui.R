@@ -192,16 +192,16 @@ ui <- dashboardPage(
                  checkboxGroupInput(
                    inputId = "genderInput",
                    label = "",
-                   choices = unique(admissions$gender),
-                   selected = unique(admissions$gender),
+                   choices = unique(admission$gender),
+                   selected = unique(admission$gender),
                    inline = TRUE
                  ),
                  sliderInput(
                    inputId = "ageInput",
                    label = "Age",
-                   value = c(min(admissions$age, na.rm = TRUE), max(admissions$age, na.rm = TRUE)),
-                   min = min(admissions$age, na.rm = TRUE),
-                   max = max(admissions$age, na.rm = TRUE),
+                   value = c(min(admission$age, na.rm = TRUE), max(admission$age, na.rm = TRUE)),
+                   min = min(admission$age, na.rm = TRUE),
+                   max = max(admission$age, na.rm = TRUE),
                    step = 1,
                    sep = ""
                  )
@@ -231,8 +231,8 @@ ui <- dashboardPage(
                  checkboxGroupInput(
                    inputId = "specInput",
                    label = "SPECIALTY",
-                   choices = unique(admissions$specialty),
-                   selected = unique(admissions$specialty)
+                   choices = unique(admission$specialty),
+                   selected = unique(admission$specialty)
                  ),
                  sliderTextInput(
                    inputId = "nInput",
@@ -244,13 +244,13 @@ ui <- dashboardPage(
                  selectizeInput(
                    inputId = "inInput",
                    label = "INCLUDE ONLY THIS SUBSPECIALTY:",
-                   choices = c(levels(as.factor(admissions$sub_specialty))),
+                   choices = c(levels(as.factor(admission$sub_specialty))),
                    multiple = TRUE
                  ),
                  selectizeInput(
                    inputId = "exInput",
                    label = "EXCLUDE SUBSPECIALTY",
-                   choices = c(levels(as.factor(admissions$sub_specialty))),
+                   choices = c(levels(as.factor(admission$sub_specialty))),
                    multiple = TRUE
                  )
                ),
@@ -263,8 +263,8 @@ ui <- dashboardPage(
                  checkboxGroupInput(
                    inputId = "admissionInput",
                    label = "",
-                   choices = levels(as.factor(admissions$adm_route)),
-                   selected = levels(as.factor(admissions$adm_route))
+                   choices = levels(as.factor(admission$adm_route)),
+                   selected = levels(as.factor(admission$adm_route))
                  )
                ),
                br(),
@@ -282,8 +282,8 @@ ui <- dashboardPage(
                    inputId = "checkInput",
                    label = "DAYS TO FIRST TEST (IN RELATION TO START OF antimicrobial)",
                    value = c(-1L, 1L),
-                   min = min(c(admissions$bc_timing, admissions$uc_timing), na.rm = TRUE),
-                   max = max(c(admissions$bc_timing, admissions$uc_timing), na.rm = TRUE),
+                   min = min(c(admission$bc_timing, admission$uc_timing), na.rm = TRUE),
+                   max = max(c(admission$bc_timing, admission$uc_timing), na.rm = TRUE),
                    step = 1L
                  )
                ),
