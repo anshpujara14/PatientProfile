@@ -1,7 +1,7 @@
 
 source('dependencies.R')
 
-lapply(required_packages, require, character.only = TRUE)
+# lapply(required_packages, require, character.only = TRUE)
 
 # DATA TRANSFORMATION AND NEW VARIABLES -----------------------------------
 
@@ -89,11 +89,11 @@ microbiology <- microbiology %>%
 microbiology <- microbiology %>%
   left_join(micro) %>%
   select(-c(specialty)) %>%
-  left_join(admissions)
+  left_join(admission)
 
 antimicrobial <- antimicrobial %>%
   semi_join(anti) %>%
-  left_join(admissions)
+  left_join(admission)
 
 
 amr_antibiotics <- AMR::antibiotics
@@ -150,6 +150,12 @@ update_ab <- antimicrobial %>%
   distinct(.keep_all = TRUE)
 
 
+# CHEST X-RAYS ---------------------------------------------------------------
+
+list_files <- list.files(path = "data/chest_data/NORMAL")
+patient_id <- admission$id
+chest_data <- data.frame(pat_id = patient_id[1:length(list_files)], img = sprintf("data/chest_data/NORMAL/%s", list_files))
+
 # HELP & INTRO DATA ---------------------------------------------------------------
 
 steps <- read.csv("help.csv")
@@ -175,3 +181,4 @@ fluid_design <- function(id, w, x, y, z) {
     )
   )
 }
+

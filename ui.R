@@ -1,13 +1,9 @@
-library(shiny)
-library(shinydashboard)
-library(shinyjs)
-library(rintrojs)
-
 ui <- dashboardPage(
   
   # HEADER ------------------------------------------------------------------
   dashboardHeader(
     title = span(img(src = "PatientDashboard/abc.jpg", height = 35), "ABC Hospitals"),
+    # userOutput("user"),
     titleWidth = 300,
     dropdownMenu(
       type = "notifications",
@@ -45,9 +41,9 @@ ui <- dashboardPage(
     ),
     tags$li(
       a(
-        strong("ABOUT RadaR"),
+        strong("ABOUT"),
         height = 40,
-        href = "https://github.com/ceefluz/radar/blob/master/README.md",
+        href = "Paste About Link Here",
         title = "",
         target = "_blank"
       ),
@@ -57,340 +53,58 @@ ui <- dashboardPage(
   
   # SIDEBAR -----------------------------------------------------------------
   
-  dashboardSidebar(
-    width = 300,
-    introBox(data.step = 3, data.intro = intro$text[3], #  intro tour
-             div(class = "inlay", style = "height:15px;width:100%;background-color: #ecf0f5;"),
-             sidebarMenu(
-               introBox(data.step = 1, data.intro = intro$text[1], # intro tour
-                        div(id = "sidebar_button",
-                            bsButton(inputId = "confirm", 
-                                     label = "START RADAR", 
-                                     icon = icon("play-circle"), 
-                                     style = "danger")
-                        )
-               ),
-               div(class = "inlay", style = "height:15px;width:100%;background-color: #ecf0f5;"),
-               menuItem(
-                 "antimicrobial",
-                 tabName = "antimicrobial",
-                 icon = icon("spinner"),
-                 menuItem(
-                   "START OF antimicrobial \n (IN RELATION TO START OF ADMISSION)",
-                   sliderInput(
-                     inputId = "ab_timingInput",
-                     label = "",
-                     min = 0,
-                     max = max(antimicrobial$ab_timing, na.rm = TRUE),
-                     value = c(0, max(antimicrobial$ab_timing, na.rm = TRUE)),
-                     step = 1
-                   ),
-                   switchInput(
-                     inputId = "ab_anyInput",
-                     label = "SELECTION",
-                     value = FALSE, 
-                     onLabel = "SLIDER", 
-                     offLabel = "ANY", 
-                     inline = TRUE, 
-                     size = "mini", 
-                     width = "100%", 
-                     offStatus = "danger"
-                   )
-                 ),
-                 menuItem(
-                   "MINIMUM TREATMENT DURATION (DAYS) \n ALL antimicrobial",
-                   sliderInput(
-                     inputId = "ab_allInput",
-                     label = "",
-                     value = 2L,
-                     min = 1L,
-                     max = 10L,
-                     step = 1L
-                   ),
-                   switchInput(
-                     inputId = "ab_any_allInput",
-                     label = "SELECTION",
-                     value = FALSE, 
-                     onLabel = "SLIDER", 
-                     offLabel = "ANY", 
-                     inline = TRUE, 
-                     size = "mini", 
-                     width = "100%", 
-                     offStatus = "danger"
-                   )
-                 ),
-                 menuItem(
-                   "MINIMUM DURATION OF USE (DAYS) \n SINGLE ANTIMICROBIAL",
-                   sliderInput(
-                     inputId = "ab_singleInput",
-                     label = "",
-                     value = 2L,
-                     min = 1L,
-                     max = 10L,
-                     step = 1L
-                   ),
-                   switchInput(
-                     inputId = "ab_any_singleInput",
-                     label = "SELECTION",
-                     value = FALSE, 
-                     onLabel = "SLIDER", 
-                     offLabel = "ANY", 
-                     inline = TRUE, 
-                     size = "mini", 
-                     width = "100%", 
-                     offStatus = "danger"
-                   )
-                 ),
-                 menuItem(
-                   "ADMINISTRATION ROUTE",
-                   checkboxGroupInput(
-                     inputId = "adminInput",
-                     label = "",
-                     choices = unique(antimicrobial$ab_route[!is.na(antimicrobial$ab_route)]),
-                     selected = unique(antimicrobial$ab_route[!is.na(antimicrobial$ab_route)])
-                   )
-                 ),
-                 menuItem(
-                   "FIRST antimicrobial ONLY",
-                   switchInput(
-                     inputId = "firstInput",
-                     label = "",
-                     value = FALSE, 
-                     onLabel = "FIRST", 
-                     offLabel = "ALL", 
-                     size = "mini", 
-                     width = "100%", 
-                     offStatus = "danger"
-                   )
-                 ),
-                 checkboxGroupButtons(
-                   inputId = "allInput",
-                   label = "CHOOSE GROUPS OF antimicrobial",
-                   choices = "ALL / NONE",
-                   size = "sm",
-                   selected = "ALL / NONE"
-                 ),
-                 checkboxGroupInput(
-                   inputId = "abGroupInput",
-                   label = "",
-                   choices = sort(ab_groups$ab_group)
-                 ),
-                 checkboxGroupInput(
-                   inputId = "abInput",
-                   label = "antimicrobial",
-                   choices = ab$ab_type,
-                   selected = ab$ab_type
-                 )
-               )
-               ,
-               br(),
-               br(),
-               menuItem(
-                 "PATIENTS",
-                 tabName = "patients",
-                 icon = icon("address-card"),
-                 checkboxGroupInput(
-                   inputId = "genderInput",
-                   label = "",
-                   choices = unique(admission$gender),
-                   selected = unique(admission$gender),
-                   inline = TRUE
-                 ),
-                 sliderInput(
-                   inputId = "ageInput",
-                   label = "Age",
-                   value = c(min(admission$age, na.rm = TRUE), max(admission$age, na.rm = TRUE)),
-                   min = min(admission$age, na.rm = TRUE),
-                   max = max(admission$age, na.rm = TRUE),
-                   step = 1,
-                   sep = ""
-                 )
-               ),
-               br(),
-               br(),
-               menuItem(
-                 "YEAR",
-                 tabName = "year",
-                 icon = icon("calendar"),
-                 sliderInput(
-                   inputId = "yearInput",
-                   label = "Year",
-                   value = c(min(antimicrobial$year, na.rm = TRUE), max(antimicrobial$year, na.rm = TRUE)),
-                   min = min(antimicrobial$year, na.rm = TRUE),
-                   max = max(antimicrobial$year, na.rm = TRUE),
-                   step = 1L,
-                   sep = ""
-                 )
-               ),
-               br(),
-               br(),
-               menuItem(
-                 "SPECIALTY",
-                 tabName = "specialty",
-                 icon = icon("user-md"),
-                 checkboxGroupInput(
-                   inputId = "specInput",
-                   label = "SPECIALTY",
-                   choices = unique(admission$specialty),
-                   selected = unique(admission$specialty)
-                 ),
-                 sliderTextInput(
-                   inputId = "nInput",
-                   label = "MINIMUM NUMBER OF PATIENTS PER SUBSPECIALTY",
-                   choices = c("0", "10", "100", "1000", "10000"),
-                   selected = "0",
-                   grid = TRUE
-                 ),
-                 selectizeInput(
-                   inputId = "inInput",
-                   label = "INCLUDE ONLY THIS SUBSPECIALTY:",
-                   choices = c(levels(as.factor(admission$sub_specialty))),
-                   multiple = TRUE
-                 ),
-                 selectizeInput(
-                   inputId = "exInput",
-                   label = "EXCLUDE SUBSPECIALTY",
-                   choices = c(levels(as.factor(admission$sub_specialty))),
-                   multiple = TRUE
-                 )
-               ),
-               br(),
-               br(),
-               menuItem(
-                 "ORIGIN",
-                 tabName = "admission",
-                 icon = icon("ambulance"),
-                 checkboxGroupInput(
-                   inputId = "admissionInput",
-                   label = "",
-                   choices = levels(as.factor(admission$adm_route)),
-                   selected = levels(as.factor(admission$adm_route))
-                 )
-               ),
-               br(),
-               br(),
-               menuItem(
-                 "DIAGNOSTICS",
-                 tabName = "diagnostics",
-                 icon = icon("flask"),
-                 selectInput(
-                   inputId = "diagnosticsInput",
-                   label = "",
-                   choices = list("Blood cultures" = "bc_timing", "Urine cultures" = "uc_timing")
-                 ),
-                 sliderInput(
-                   inputId = "checkInput",
-                   label = "DAYS TO FIRST TEST (IN RELATION TO START OF antimicrobial)",
-                   value = c(-1L, 1L),
-                   min = min(c(admission$bc_timing, admission$uc_timing), na.rm = TRUE),
-                   max = max(c(admission$bc_timing, admission$uc_timing), na.rm = TRUE),
-                   step = 1L
-                 )
-               ),
-               br(),
-               br(),
-               menuItem(
-                 "DOWNLOAD SELECTION",
-                 tabName = "download",
-                 icon = icon("download"),
-                 textInput(
-                   inputId = "filename",
-                   placeholder = "Name download file",
-                   label = ""
-                 ),
-                 div(
-                   downloadButton(
-                     outputId = "downloadData",
-                     label = "Save Antimicrobial/Admission Data",
-                     icon = icon("download"),
-                     style = "color: black; margin-left: 15px; margin-bottom: 5px;"
-                   )
-                 ),
-                 div(
-                   downloadButton(
-                     outputId = "downloadMicroData",
-                     label = "Save Microbiology Data",
-                     icon = icon("download"),
-                     style = "color: black; margin-left: 15px; margin-bottom: 5px;"
-                   )
-                 )
-               ),
-               br()
-               
-             )
-    )),
-
+  dashboardSidebar(disable = TRUE),
   
   # BODY --------------------------------------------------------------------
+  
   dashboardBody(
+    
     tags$head(
       tags$link(
         rel = "stylesheet", 
         type = "text/css", 
-        href = "radar_style.css")
+        href = "www/style.css")
     ),
-    
-    useShinyjs(),
-    introjsUI(),
-    
-    # MAIN BODY ---------------------------------------------------------------
     
     fluidRow(
       column(
         width = 12,
-        introBox(
-          bsButton("patients", 
-                   label = "PATIENT DETAILS", 
-                   icon = icon("user"), 
-                   style = "success"),
-          bsButton("scans", 
-                   label = "SCANS", 
-                   icon = icon("brain"), 
-                   style = "success"),
-          bsButton("diagnostics", 
-                   label = "DIAGNOSTICS", 
-                   icon = icon("flask", class = "flask-box"), 
-                   style = "success"),
-          bsButton("outcome", 
-                   label = "OUTCOME", 
-                   icon = icon("file-chart-column"), 
-                   style = "success"),
-          data.step = 2, 
-          data.intro = intro$text[2]
-          )
+        bsButton("patients", 
+                 label = "PATIENT DETAILS", 
+                 icon = icon("user"), 
+                 style = "success"),
+        bsButton("scans", 
+                 label = "SCANS", 
+                 icon = icon("brain"), 
+                 style = "success"),
+        bsButton("diagnostics", 
+                 label = "DIAGNOSTICS", 
+                 icon = icon("flask", class = "flask-box"), 
+                 style = "success"),
+        bsButton("outcome", 
+                 label = "OUTCOME", 
+                 icon = icon("file-chart-column"), 
+                 style = "success")
       )
-    ),
-    
-    fluid_design("scans_panel", "box1", "box2", "box3", "box4"),
-    fluid_design("diagnostics_panel", "box5", "box6", "box7", "box8"),
-    fluid_design("outcome_panel", "box_los1", "box_los2", "box_los3", NULL),
-    
-    fluidRow(
-      div(
-        id = "patients_panel", 
-        column(
-          width = 12,
-          introBox(data.step = 4, data.intro = intro$text[4],
-                   uiOutput("box_pat")
-          )
-        ),
-        column(
-          width = 6,
-          uiOutput("box_pat2")
-        ),
-        column(
-          width = 6,
-          uiOutput("box_year")
-        )
+    )
+  ),
+  
+  fluidRow(
+    div(
+      id = "patients_panel", 
+      column(
+        width = 12,
+        uiOutput("box_pat")
+      ),
+      column(
+        width = 6,
+        uiOutput("box_pat2")
+      ),
+      column(
+        width = 6,
+        uiOutput("box_year")
       )
     )
   )
-  
-  
 )
-
-server <- function(input, output, session) {
   
-}
-
-shinyApp(ui, server)
