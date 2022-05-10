@@ -1,4 +1,4 @@
-﻿# `Patient Profile` ![logo_pprofile](www/pprofile-icon (1).png)
+﻿# `Patient Profile` ![logo_pprofile](www/pprofile-icon.png)
 PatientProfile is an application for an on-the-go access to all the medical records and history of a patient along with interactive visualizations and data analysis.
 <br>
 
